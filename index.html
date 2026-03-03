@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Préqualification RH — Coline</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    :root {
+      --bg-page: #FFFBF8;
+      --bg-card: #FEF2EE;
+      --text-primary: #2E3A4B;
+      --text-secondary: #5A687B;
+      --accent: #D36C4A;
+      --accent-hover: #C45A3A;
+      --accent-soft: #F5E6E0;
+      --border: #E8E4E0;
+      --shadow: 0 2px 12px rgba(45, 58, 75, 0.06);
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg-page);
+      color: var(--text-primary);
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 2rem 1.25rem;
+      line-height: 1.5;
+    }
+    .page-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0 0 2rem;
+      letter-spacing: -0.02em;
+    }
+    .section {
+      margin-bottom: 2rem;
+    }
+    .section-label {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      margin-bottom: 0.75rem;
+    }
+    .section-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0 0 0.35rem;
+    }
+    .section-subtitle {
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      margin: 0 0 1rem;
+      font-weight: 400;
+    }
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.25rem 1.5rem;
+      border: 1px solid var(--border);
+    }
+    /* ——— Documents ——— */
+    .docs-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    @media (max-width: 520px) {
+      .docs-grid { grid-template-columns: 1fr; }
+    }
+    .file-card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.25rem;
+      border: 1px solid var(--border);
+      border: 2px dashed var(--border);
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .file-card.has-file { border-style: solid; border-color: var(--accent-soft); background: var(--accent-soft); }
+    .file-card label { font-size: 0.875rem; font-weight: 500; color: var(--text-secondary); margin-bottom: 0.5rem; display: block; }
+    .file-card input[type="file"] { display: none; }
+    .file-card .btn-upload {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      font-weight: 500;
+      font-family: inherit;
+      margin-top: 0.25rem;
+    }
+    .file-card .btn-upload:hover { background: var(--accent-hover); }
+    .file-name { font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem; display: block; }
+    /* ——— Paramètres ——— */
+    .params-card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.5rem;
+      border: 1px solid var(--border);
+    }
+    .params-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    @media (max-width: 520px) {
+      .params-row { grid-template-columns: 1fr; }
+    }
+    .field-group label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 0.4rem;
+    }
+    .field-group select {
+      width: 100%;
+      padding: 0.6rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.9375rem;
+      font-family: inherit;
+      color: var(--text-primary);
+      background: var(--bg-card);
+    }
+    .thematiques-label {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 0.75rem;
+      display: block;
+    }
+    .checkbox-group {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.5rem 1.25rem;
+    }
+    .checkbox-group label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      margin: 0;
+    }
+    .checkbox-group input[type="checkbox"] {
+      width: 1rem;
+      height: 1rem;
+      margin: 0;
+      accent-color: var(--accent);
+    }
+    @media (max-width: 600px) {
+      .checkbox-group { grid-template-columns: 1fr; }
+    }
+    /* ——— Évaluation (card) ——— */
+    .eval-card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.5rem;
+      border: 1px solid var(--border);
+    }
+    .eval-card .section-title { margin-bottom: 1rem; }
+    .eval-table { width: 100%; border-collapse: collapse; }
+    .eval-table th {
+      text-align: left;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--text-secondary);
+      padding: 0.5rem 0.75rem 0.5rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .eval-table td {
+      padding: 0.6rem 0.75rem 0.6rem 0;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .eval-table tr:last-child td { border-bottom: none; }
+    .eval-table input[type="text"],
+    .eval-table input[type="number"],
+    .eval-table textarea {
+      width: 100%;
+      padding: 0.5rem 0.65rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.9375rem;
+      font-family: inherit;
+      color: var(--text-primary);
+    }
+    .eval-table input[type="number"] { max-width: 5rem; }
+    .eval-table textarea { min-height: 4rem; resize: vertical; }
+    /* ——— Submit & message ——— */
+    .submit-section {
+      margin-top: 2rem;
+      margin-bottom: 0;
+      text-align: center;
+    }
+    .submit-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      margin-bottom: 0;
+    }
+    .submit-section .message { margin-left: auto; margin-right: auto; max-width: 420px; }
+    .btn-submit {
+      padding: 0.85rem 1.75rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: inherit;
+      border-radius: var(--radius-sm);
+      box-shadow: 0 2px 8px rgba(211, 108, 74, 0.35);
+    }
+    .btn-submit:hover { background: var(--accent-hover); }
+    .btn-submit:disabled { background: #b0a8a0; cursor: not-allowed; box-shadow: none; }
+    .message {
+      margin-top: 1rem;
+      padding: 0.9rem 1rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.9375rem;
+    }
+    .message.success { background: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; }
+    .message.error { background: #FFEBEE; color: #C62828; border: 1px solid #EF9A9A; }
+    .loader {
+      display: inline-block;
+      width: 1rem;
+      height: 1rem;
+      border: 2px solid #fff;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      vertical-align: middle;
+      margin-right: 0.5rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    /* ——— Séparation avant / après l'appel ——— */
+    .after-call-section {
+      margin-top: 3rem;
+      padding-top: 2.5rem;
+      border-top: 2px solid var(--border);
+    }
+    .after-call-section .section-label {
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <h1 class="page-title">Préqualification RH</h1>
+
+  <section class="section" aria-labelledby="sec-docs">
+    <span class="section-label">Étape 1</span>
+    <h2 class="section-title" id="sec-docs">Documents</h2>
+    <p class="section-subtitle">Ceci peut être automatisé ou connecté à un CRM.</p>
+    <div class="docs-grid">
+      <div class="file-card" id="cardFichePoste">
+        <label for="fichePoste">Fiche de Poste (PDF)</label>
+        <input type="file" id="fichePoste" accept=".pdf">
+        <button type="button" class="btn-upload" id="btnFichePoste">Choisir un PDF</button>
+        <span class="file-name" id="nameFichePoste">Aucun fichier</span>
+      </div>
+      <div class="file-card" id="cardCv">
+        <label for="cv">CV Candidat (PDF)</label>
+        <input type="file" id="cv" accept=".pdf">
+        <button type="button" class="btn-upload" id="btnCv">Choisir un PDF</button>
+        <span class="file-name" id="nameCv">Aucun fichier</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="sec-params">
+    <span class="section-label">Étape 2</span>
+    <h2 class="section-title" id="sec-params">Paramètres de l'appel</h2>
+    <p class="section-subtitle">Ces paramètres pourraient être ajustables (ex. par défaut selon le poste).</p>
+    <div class="params-card card">
+      <div class="params-row">
+        <div class="field-group">
+          <label for="ton">Ton</label>
+          <select id="ton">
+            <option value="Amical">Amical</option>
+            <option value="Professionnel">Professionnel</option>
+            <option value="Direct">Direct</option>
+            <option value="Dynamique">Dynamique</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label for="duree">Durée de l'appel</label>
+          <select id="duree">
+            <option value="Court (2-3 minutes)">Court (2-3 minutes)</option>
+            <option value="Moyen (5-6 minutes)">Moyen (5-6 minutes)</option>
+            <option value="Long (8-10 minutes)">Long (8-10 minutes)</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-group">
+        <span class="thematiques-label">Thématiques à aborder</span>
+        <div class="checkbox-group" id="thematiques">
+          <label><input type="checkbox" name="thematique" value="Disponibilité"> Disponibilité</label>
+          <label><input type="checkbox" name="thematique" value="Localisation"> Localisation</label>
+          <label><input type="checkbox" name="thematique" value="Prétentions salariales"> Prétentions salariales</label>
+          <label><input type="checkbox" name="thematique" value="3 dernières expériences"> 3 dernières expériences</label>
+          <label><input type="checkbox" name="thematique" value="Motivation"> Motivation</label>
+          <label><input type="checkbox" name="thematique" value="Compétences techniques"> Compétences techniques</label>
+          <label><input type="checkbox" name="thematique" value="Soft skills"> Soft skills</label>
+          <label><input type="checkbox" name="thematique" value="Mobilité"> Mobilité</label>
+          <label><input type="checkbox" name="thematique" value="Disponibilité pour entretien"> Disponibilité pour entretien</label>
+          <label><input type="checkbox" name="thematique" value="Questions du candidat"> Questions du candidat</label>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section submit-section">
+    <div class="submit-buttons">
+      <button type="button" class="btn-submit" id="btnSubmitMarco">Lancer l'appel Marco</button>
+      <button type="button" class="btn-submit" id="btnSubmitAnis">Lancer l'appel Anis</button>
+    </div>
+    <div id="message" class="message" style="display: none;"></div>
+  </section>
+
+  <section class="section after-call-section" aria-labelledby="sec-eval">
+    <span class="section-label">Après l'appel</span>
+    <h2 class="section-title" id="sec-eval">Évaluation du candidat</h2>
+    <p class="section-subtitle">Des liens vers les CRM pourraient être réalisés.</p>
+    <div class="eval-card card">
+      <table class="eval-table">
+        <thead>
+          <tr>
+            <th>Nom & Prénom</th>
+            <th>Note (%)</th>
+            <th>Commentaire</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><input type="text" id="nom" placeholder="Nom et prénom"></td>
+            <td><input type="number" id="note" min="0" max="100" placeholder="0-100"></td>
+            <td><textarea id="commentaire" placeholder="Commentaire"></textarea></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <script>
+    (function () {
+      // Production : le workflow n8n doit être activé (published). Test : remplacer /webhook/ par /webhook-test/
+      const WEBHOOK_URL = 'https://back.coline.ai/webhook/050b72c2-002e-41e2-a005-481c4473a861';
+      // https://back.coline.ai/webhook-test/050b72c2-002e-41e2-a005-481c4473a861
+      // const WEBHOOK_URL = 'https://ups93.app.n8n.cloud/webhook/050b72c2-002e-41e2-a005-481c4473a861';
+      const inputFichePoste = document.getElementById('fichePoste');
+      const inputCv = document.getElementById('cv');
+      const btnFichePoste = document.getElementById('btnFichePoste');
+      const btnCv = document.getElementById('btnCv');
+      const nameFichePoste = document.getElementById('nameFichePoste');
+      const nameCv = document.getElementById('nameCv');
+      const cardFichePoste = document.getElementById('cardFichePoste');
+      const cardCv = document.getElementById('cardCv');
+      const btnSubmitMarco = document.getElementById('btnSubmitMarco');
+      const btnSubmitAnis = document.getElementById('btnSubmitAnis');
+      const messageEl = document.getElementById('message');
+
+      btnFichePoste.addEventListener('click', function () { inputFichePoste.click(); });
+      btnCv.addEventListener('click', function () { inputCv.click(); });
+
+      inputFichePoste.addEventListener('change', function () {
+        nameFichePoste.textContent = this.files.length ? this.files[0].name : 'Aucun fichier';
+        cardFichePoste.classList.toggle('has-file', !!this.files.length);
+      });
+      inputCv.addEventListener('change', function () {
+        nameCv.textContent = this.files.length ? this.files[0].name : 'Aucun fichier';
+        cardCv.classList.toggle('has-file', !!this.files.length);
+      });
+
+      function showMessage(text, isError) {
+        messageEl.style.display = 'block';
+        messageEl.textContent = text;
+        messageEl.className = 'message ' + (isError ? 'error' : 'success');
+      }
+
+      function setLoading(loading) {
+        btnSubmitMarco.disabled = loading;
+        btnSubmitAnis.disabled = loading;
+        var loadingHtml = '<span class="loader"></span> Envoi en cours...';
+        btnSubmitMarco.innerHTML = loading ? loadingHtml : 'Lancer l\'appel Marco';
+        btnSubmitAnis.innerHTML = loading ? loadingHtml : 'Lancer l\'appel Anis';
+      }
+
+      function launchCall(recruteur) {
+        if (!inputFichePoste.files.length) {
+          showMessage('Veuillez sélectionner le PDF Fiche de Poste.', true);
+          return;
+        }
+        if (!inputCv.files.length) {
+          showMessage('Veuillez sélectionner le PDF CV Candidat.', true);
+          return;
+        }
+
+        const ton = document.getElementById('ton').value;
+        const duree = document.getElementById('duree').value;
+        const thematiques = Array.from(document.querySelectorAll('input[name="thematique"]:checked')).map(function (c) { return c.value; });
+        const nom = document.getElementById('nom').value;
+        const note = document.getElementById('note').value;
+        const commentaire = document.getElementById('commentaire').value;
+
+        const formData = new FormData();
+        formData.append('fichePoste', inputFichePoste.files[0]);
+        formData.append('cv', inputCv.files[0]);
+        formData.append('recruteur', recruteur);
+        formData.append('ton', ton);
+        formData.append('duree', duree);
+        thematiques.forEach(function (t) { formData.append('thematiques[]', t); });
+        formData.append('nom', nom);
+        formData.append('note', note);
+        formData.append('commentaire', commentaire);
+
+        setLoading(true);
+        messageEl.style.display = 'none';
+
+        fetch(WEBHOOK_URL, {
+          method: 'POST',
+          body: formData
+        })
+          .then(function (res) {
+            if (!res.ok) throw new Error('Erreur serveur: ' + res.status + ' ' + res.statusText);
+            return res.text();
+          })
+          .then(function () {
+            showMessage('Workflow lancé avec succès.');
+          })
+          .catch(function (err) {
+            showMessage('Erreur: ' + (err.message || String(err)), true);
+          })
+          .finally(function () {
+            setLoading(false);
+          });
+      }
+
+      btnSubmitMarco.addEventListener('click', function () { launchCall('Marco'); });
+      btnSubmitAnis.addEventListener('click', function () { launchCall('Anis'); });
+    })();
+  </script>
+</body>
+</html>

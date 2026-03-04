@@ -268,15 +268,50 @@
     .after-call-section .section-label {
       margin-bottom: 0.5rem;
     }
+    /* ——— Encoche Mode Démo / Production ——— */
+    .mode-notch {
+      position: fixed;
+      top: 0.75rem;
+      right: 1rem;
+      z-index: 100;
+      display: flex;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      cursor: pointer;
+      user-select: none;
+    }
+    .mode-notch .mode-option {
+      padding: 0.4rem 0.9rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      transition: color 0.2s, background 0.2s;
+    }
+    .mode-notch .mode-option.active {
+      background: var(--accent);
+      color: #fff;
+    }
+    .mode-notch .mode-option:not(.active):hover {
+      color: var(--text-primary);
+    }
+    .section-docs.demo-optional .file-card { opacity: 0.85; }
+    .demo-hint { font-size: 0.8rem; color: var(--text-secondary); font-style: italic; }
   </style>
 </head>
 <body>
+  <div class="mode-notch" id="modeNotch" role="switch" aria-checked="false" aria-label="Mode Démo ou Production">
+    <span class="mode-option active" data-mode="demo">Démo</span>
+    <span class="mode-option" data-mode="production">Production</span>
+  </div>
   <h1 class="page-title">Préqualification RH</h1>
 
-  <section class="section" aria-labelledby="sec-docs">
+  <section class="section section-docs" aria-labelledby="sec-docs">
     <span class="section-label">Étape 1</span>
     <h2 class="section-title" id="sec-docs">Documents</h2>
-    <p class="section-subtitle">Ceci peut être automatisé ou connecté à un CRM.</p>
+    <p class="section-subtitle">Ceci peut être automatisé ou connecté à un CRM. <span id="demoDocsHint" class="demo-hint" style="display: none;">En mode Démo, les PDF ne sont pas requis.</span></p>
     <div class="docs-grid">
       <div class="file-card" id="cardFichePoste">
         <label for="fichePoste">Fiche de Poste (PDF)</label>
@@ -300,6 +335,14 @@
     <div class="params-card card">
       <div class="params-row">
         <div class="field-group">
+          <label for="appelPour">Appel pour</label>
+          <select id="appelPour">
+            <option value="+33652771290">Marco</option>
+            <option value="+33777856054">Matthieu</option>
+            <option value="+33783241789">Anis</option>
+          </select>
+        </div>
+        <div class="field-group">
           <label for="ton">Ton</label>
           <select id="ton">
             <option value="Amical">Amical</option>
@@ -308,28 +351,18 @@
             <option value="Dynamique">Dynamique</option>
           </select>
         </div>
-        <div class="field-group">
-          <label for="duree">Durée de l'appel</label>
-          <select id="duree">
-            <option value="Court (2-3 minutes)">Court (2-3 minutes)</option>
-            <option value="Moyen (5-6 minutes)">Moyen (5-6 minutes)</option>
-            <option value="Long (8-10 minutes)">Long (8-10 minutes)</option>
-          </select>
-        </div>
       </div>
       <div class="field-group">
         <span class="thematiques-label">Thématiques à aborder</span>
         <div class="checkbox-group" id="thematiques">
-          <label><input type="checkbox" name="thematique" value="Disponibilité"> Disponibilité</label>
+          <label><input type="checkbox" name="thematique" value="Disponibilité pour le poste"> Disponibilité pour le poste</label>
           <label><input type="checkbox" name="thematique" value="Localisation"> Localisation</label>
           <label><input type="checkbox" name="thematique" value="Prétentions salariales"> Prétentions salariales</label>
-          <label><input type="checkbox" name="thematique" value="3 dernières expériences"> 3 dernières expériences</label>
-          <label><input type="checkbox" name="thematique" value="Motivation"> Motivation</label>
+          <label><input type="checkbox" name="thematique" value="Dernières expériences"> Dernières expériences</label>
           <label><input type="checkbox" name="thematique" value="Compétences techniques"> Compétences techniques</label>
           <label><input type="checkbox" name="thematique" value="Soft skills"> Soft skills</label>
-          <label><input type="checkbox" name="thematique" value="Mobilité"> Mobilité</label>
           <label><input type="checkbox" name="thematique" value="Disponibilité pour entretien"> Disponibilité pour entretien</label>
-          <label><input type="checkbox" name="thematique" value="Questions du candidat"> Questions du candidat</label>
+          <label><input type="checkbox" name="thematique" value="Droit au travail en France"> Droit au travail en France</label>
         </div>
       </div>
     </div>
@@ -372,7 +405,8 @@
       // Production : le workflow n8n doit être activé (published). Test : remplacer /webhook/ par /webhook-test/
       const WEBHOOK_URL = 'https://back.coline.ai/webhook/050b72c2-002e-41e2-a005-481c4473a861';
       // https://back.coline.ai/webhook-test/050b72c2-002e-41e2-a005-481c4473a861
-      // const WEBHOOK_URL = 'https://ups93.app.n8n.cloud/webhook/050b72c2-002e-41e2-a005-481c4473a861';
+      // const WEBHOOK_URL = 'https://ups93.app.n8n.cloud/webhook-test/050b72c2-002e-41e2-a005-481c4473a861';
+      let isDemoMode = true;
       const inputFichePoste = document.getElementById('fichePoste');
       const inputCv = document.getElementById('cv');
       const btnFichePoste = document.getElementById('btnFichePoste');
@@ -384,6 +418,23 @@
       const btnSubmitMarco = document.getElementById('btnSubmitMarco');
       const btnSubmitAnis = document.getElementById('btnSubmitAnis');
       const messageEl = document.getElementById('message');
+      const modeNotch = document.getElementById('modeNotch');
+      const sectionDocs = document.querySelector('.section-docs');
+      const demoDocsHint = document.getElementById('demoDocsHint');
+      const selectAppelPour = document.getElementById('appelPour');
+
+      // Encoche Démo / Production
+      modeNotch.addEventListener('click', function () {
+        isDemoMode = !isDemoMode;
+        modeNotch.querySelectorAll('.mode-option').forEach(function (el) {
+          el.classList.toggle('active', el.getAttribute('data-mode') === (isDemoMode ? 'demo' : 'production'));
+        });
+        modeNotch.setAttribute('aria-checked', isDemoMode ? 'false' : 'true');
+        sectionDocs.classList.toggle('demo-optional', isDemoMode);
+        demoDocsHint.style.display = isDemoMode ? 'inline' : 'none';
+      });
+      sectionDocs.classList.add('demo-optional');
+      demoDocsHint.style.display = 'inline';
 
       btnFichePoste.addEventListener('click', function () { inputFichePoste.click(); });
       btnCv.addEventListener('click', function () { inputCv.click(); });
@@ -412,28 +463,33 @@
       }
 
       function launchCall(recruteur) {
-        if (!inputFichePoste.files.length) {
-          showMessage('Veuillez sélectionner le PDF Fiche de Poste.', true);
-          return;
-        }
-        if (!inputCv.files.length) {
-          showMessage('Veuillez sélectionner le PDF CV Candidat.', true);
-          return;
+        if (!isDemoMode) {
+          if (!inputFichePoste.files.length) {
+            showMessage('Veuillez sélectionner le PDF Fiche de Poste.', true);
+            return;
+          }
+          if (!inputCv.files.length) {
+            showMessage('Veuillez sélectionner le PDF CV Candidat.', true);
+            return;
+          }
         }
 
+        var recruteurValue = isDemoMode ? 'Demo_' + recruteur : recruteur;
         const ton = document.getElementById('ton').value;
-        const duree = document.getElementById('duree').value;
+        const appelPour = selectAppelPour.value;
+        const appelPourName = selectAppelPour.options[selectAppelPour.selectedIndex].text;
         const thematiques = Array.from(document.querySelectorAll('input[name="thematique"]:checked')).map(function (c) { return c.value; });
         const nom = document.getElementById('nom').value;
         const note = document.getElementById('note').value;
         const commentaire = document.getElementById('commentaire').value;
 
         const formData = new FormData();
-        formData.append('fichePoste', inputFichePoste.files[0]);
-        formData.append('cv', inputCv.files[0]);
-        formData.append('recruteur', recruteur);
+        if (!isDemoMode && inputFichePoste.files.length) formData.append('fichePoste', inputFichePoste.files[0]);
+        if (!isDemoMode && inputCv.files.length) formData.append('cv', inputCv.files[0]);
+        formData.append('recruteur', recruteurValue);
+        formData.append('appel_pour', appelPour);
+        formData.append('name', appelPourName);
         formData.append('ton', ton);
-        formData.append('duree', duree);
         thematiques.forEach(function (t) { formData.append('thematiques[]', t); });
         formData.append('nom', nom);
         formData.append('note', note);

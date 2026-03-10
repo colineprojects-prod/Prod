@@ -239,6 +239,8 @@
     }
     .btn-submit:hover { background: var(--accent-hover); }
     .btn-submit:disabled { background: #b0a8a0; cursor: not-allowed; box-shadow: none; }
+    .btn-secondary { background: var(--text-secondary); box-shadow: 0 2px 8px rgba(90, 104, 123, 0.3); }
+    .btn-secondary:hover { background: #4a5568; }
     .message {
       margin-top: 1rem;
       padding: 0.9rem 1rem;
@@ -395,6 +397,9 @@
     <span class="section-label">Après l'appel</span>
     <h2 class="section-title" id="sec-eval">Évaluation du candidat</h2>
     <p class="section-subtitle">Des liens vers les CRM pourraient être réalisés.</p>
+    <div class="eval-actions" style="margin-bottom: 1rem;">
+      <button type="button" class="btn-submit btn-secondary" id="btnLoadEval">Charger l'évaluation depuis le sheet</button>
+    </div>
     <div class="eval-card card">
       <table class="eval-table">
         <thead>
@@ -419,8 +424,10 @@
     (function () {
       // Production : le workflow n8n doit être activé (published). Test : remplacer /webhook/ par /webhook-test/
       const WEBHOOK_URL = 'https://back.coline.ai/webhook/050b72c2-002e-41e2-a005-481c4473a861';
-      // https://back.coline.ai/webhook-test/050b72c2-002e-41e2-a005-481c4473a861
-      // const WEBHOOK_URL = 'https://ups93.app.n8n.cloud/webhook-test/050b72c2-002e-41e2-a005-481c4473a861';
+      // URL du webhook n8n en GET qui renvoie une évaluation (Nom, Note, Commentaire) depuis Google Sheets. Optionnel si EVAL_CSV_URL est utilisé.
+      const EVAL_GET_URL = ''; // ex: 'https://back.coline.ai/webhook/xxx'
+      // URL du Google Sheet publié en CSV (Option 2). Si renseignée, le bouton charge les données depuis ce CSV.
+      const EVAL_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRk-4omlYNLRYx3eZcopDxXDkxeAVFN200RG_R1csyhtGMfI_1sjcqU0d8XSM4apCg0SQ9eFB5siudH/pub?gid=0&single=true&output=csv';
       let isDemoMode = true;
       const inputFichePoste = document.getElementById('fichePoste');
       const inputCv = document.getElementById('cv');
@@ -441,6 +448,10 @@
       const fieldDemoCv = document.getElementById('fieldDemoCv');
       const selectDemoFiche = document.getElementById('demoFichePoste');
       const selectDemoCv = document.getElementById('demoCv');
+      const btnLoadEval = document.getElementById('btnLoadEval');
+      const inputNom = document.getElementById('nom');
+      const inputNote = document.getElementById('note');
+      const inputCommentaire = document.getElementById('commentaire');
 
       function updateModeUI() {
         fieldDemoFiche.style.display = isDemoMode ? '' : 'none';
@@ -544,6 +555,112 @@
       }
 
       btnSubmitCall.addEventListener('click', launchCall);
+
+      // Parser CSV avec champs entre guillemets (virgules et retours à la ligne autorisés à l'intérieur)
+      function parseCSV(csvText) {
+        csvText = (csvText || '').replace(/^\uFEFF/, '');
+        var rows = [];
+        var row = [];
+        var cell = '';
+        var inQuotes = false;
+        for (var i = 0; i < csvText.length; i++) {
+          var c = csvText[i];
+          if (inQuotes) {
+            if (c === '"') inQuotes = false;
+            else cell += c;
+          } else {
+            if (c === '"') inQuotes = true;
+            else if (c === ',') {
+              row.push(cell);
+              cell = '';
+            } else if (c === '\n' || c === '\r') {
+              row.push(cell);
+              rows.push(row);
+              row = [];
+              cell = '';
+              if (c === '\r' && csvText[i + 1] === '\n') i++;
+            } else cell += c;
+          }
+        }
+        if (cell || row.length) {
+          row.push(cell);
+          rows.push(row);
+        }
+        return rows;
+      }
+
+      // Charger l'évaluation depuis Google Sheets (CSV publié ou webhook n8n)
+      btnLoadEval.addEventListener('click', function () {
+        if (EVAL_CSV_URL) {
+          btnLoadEval.disabled = true;
+          btnLoadEval.textContent = 'Chargement...';
+          messageEl.style.display = 'none';
+          fetch(EVAL_CSV_URL, { method: 'GET' })
+            .then(function (res) {
+              if (!res.ok) throw new Error('Erreur ' + res.status);
+              return res.text();
+            })
+            .then(function (csvText) {
+              var rows = parseCSV(csvText);
+              if (rows.length < 2) throw new Error('Sheet vide ou sans données');
+              var header = rows[0].map(function (h) { return (h || '').trim(); });
+              var idxTesteur = header.indexOf('Testeur');
+              var idxNom = header.indexOf('Nom');
+              var idxNote = header.indexOf('Note');
+              var idxCommentaire = header.indexOf('Commentaire');
+              if (idxNom < 0 || idxNote < 0 || idxCommentaire < 0) throw new Error('Colonnes Nom, Note ou Commentaire introuvables');
+              var testeur = isDemoMode ? 'Demo_' + selectDemoFiche.value + '_' + selectDemoCv.value : null;
+              var dataRow = null;
+              for (var r = rows.length - 1; r >= 1; r--) {
+                var row = rows[r];
+                var rowTesteur = (row[idxTesteur] || '').trim();
+                if (testeur && rowTesteur === testeur) { dataRow = row; break; }
+                if (!testeur && rowTesteur) { dataRow = row; break; }
+              }
+              if (!dataRow) dataRow = rows[rows.length - 1];
+              inputNom.value = (dataRow[idxNom] || '').trim();
+              inputNote.value = (dataRow[idxNote] || '').trim();
+              inputCommentaire.value = (dataRow[idxCommentaire] || '').trim();
+              showMessage('Évaluation chargée depuis le sheet.');
+            })
+            .catch(function (err) {
+              showMessage('Impossible de charger l\'évaluation: ' + (err.message || String(err)) + (err.message && err.message.indexOf('CORS') !== -1 ? ' (CORS – essayez l’option n8n).' : ''), true);
+            })
+            .finally(function () {
+              btnLoadEval.disabled = false;
+              btnLoadEval.textContent = 'Charger l\'évaluation depuis le sheet';
+            });
+          return;
+        }
+        if (!EVAL_GET_URL) {
+          showMessage('Configurez EVAL_CSV_URL (URL du sheet en CSV) ou EVAL_GET_URL (webhook n8n). Voir GUIDE-EVALUATION-SHEET.md.', true);
+          return;
+        }
+        var url = EVAL_GET_URL;
+        var testeur = isDemoMode ? 'Demo_' + selectDemoFiche.value + '_' + selectDemoCv.value : null;
+        if (testeur) url += (url.indexOf('?') !== -1 ? '&' : '?') + 'testeur=' + encodeURIComponent(testeur);
+        btnLoadEval.disabled = true;
+        btnLoadEval.textContent = 'Chargement...';
+        messageEl.style.display = 'none';
+        fetch(url, { method: 'GET' })
+          .then(function (res) {
+            if (!res.ok) throw new Error('Erreur ' + res.status);
+            return res.json();
+          })
+          .then(function (data) {
+            inputNom.value = data.nom || data.Nom || '';
+            inputNote.value = data.note !== undefined ? data.note : (data.Note !== undefined ? data.Note : '');
+            inputCommentaire.value = data.commentaire || data.Commentaire || '';
+            showMessage('Évaluation chargée.');
+          })
+          .catch(function (err) {
+            showMessage('Impossible de charger l\'évaluation: ' + (err.message || String(err)), true);
+          })
+          .finally(function () {
+            btnLoadEval.disabled = false;
+            btnLoadEval.textContent = 'Charger l\'évaluation depuis le sheet';
+          });
+      });
     })();
   </script>
 </body>

@@ -334,12 +334,28 @@
     <p class="section-subtitle">Ces paramètres pourraient être ajustables (ex. par défaut selon le poste).</p>
     <div class="params-card card">
       <div class="params-row">
-        <div class="field-group">
+        <div class="field-group" id="fieldAppelPour">
           <label for="appelPour">Appel pour</label>
           <select id="appelPour">
             <option value="+33652771290">Marco</option>
             <option value="+33777856054">Matthieu</option>
             <option value="+33783241789">Anis</option>
+          </select>
+        </div>
+        <div class="field-group" id="fieldDemoFiche" style="display: none;">
+          <label for="demoFichePoste">Fiche de poste</label>
+          <select id="demoFichePoste">
+            <option value="Cariste">Cariste</option>
+            <option value="Electricien">Electricien</option>
+            <option value="Hotesse">Hotesse</option>
+          </select>
+        </div>
+        <div class="field-group" id="fieldDemoCv" style="display: none;">
+          <label for="demoCv">CV</label>
+          <select id="demoCv">
+            <option value="Excellent">Excellent</option>
+            <option value="Bon">Bon</option>
+            <option value="Moyen">Moyen</option>
           </select>
         </div>
         <div class="field-group">
@@ -370,8 +386,7 @@
 
   <section class="section submit-section">
     <div class="submit-buttons">
-      <button type="button" class="btn-submit" id="btnSubmitMarco">Lancer l'appel Marco</button>
-      <button type="button" class="btn-submit" id="btnSubmitAnis">Lancer l'appel Anis</button>
+      <button type="button" class="btn-submit" id="btnSubmitCall">Lancer l'appel</button>
     </div>
     <div id="message" class="message" style="display: none;"></div>
   </section>
@@ -415,13 +430,22 @@
       const nameCv = document.getElementById('nameCv');
       const cardFichePoste = document.getElementById('cardFichePoste');
       const cardCv = document.getElementById('cardCv');
-      const btnSubmitMarco = document.getElementById('btnSubmitMarco');
-      const btnSubmitAnis = document.getElementById('btnSubmitAnis');
+      const btnSubmitCall = document.getElementById('btnSubmitCall');
       const messageEl = document.getElementById('message');
       const modeNotch = document.getElementById('modeNotch');
       const sectionDocs = document.querySelector('.section-docs');
       const demoDocsHint = document.getElementById('demoDocsHint');
       const selectAppelPour = document.getElementById('appelPour');
+      const fieldAppelPour = document.getElementById('fieldAppelPour');
+      const fieldDemoFiche = document.getElementById('fieldDemoFiche');
+      const fieldDemoCv = document.getElementById('fieldDemoCv');
+      const selectDemoFiche = document.getElementById('demoFichePoste');
+      const selectDemoCv = document.getElementById('demoCv');
+
+      function updateModeUI() {
+        fieldDemoFiche.style.display = isDemoMode ? '' : 'none';
+        fieldDemoCv.style.display = isDemoMode ? '' : 'none';
+      }
 
       // Encoche Démo / Production
       modeNotch.addEventListener('click', function () {
@@ -432,7 +456,9 @@
         modeNotch.setAttribute('aria-checked', isDemoMode ? 'false' : 'true');
         sectionDocs.classList.toggle('demo-optional', isDemoMode);
         demoDocsHint.style.display = isDemoMode ? 'inline' : 'none';
+        updateModeUI();
       });
+      updateModeUI();
       sectionDocs.classList.add('demo-optional');
       demoDocsHint.style.display = 'inline';
 
@@ -455,14 +481,12 @@
       }
 
       function setLoading(loading) {
-        btnSubmitMarco.disabled = loading;
-        btnSubmitAnis.disabled = loading;
+        btnSubmitCall.disabled = loading;
         var loadingHtml = '<span class="loader"></span> Envoi en cours...';
-        btnSubmitMarco.innerHTML = loading ? loadingHtml : 'Lancer l\'appel Marco';
-        btnSubmitAnis.innerHTML = loading ? loadingHtml : 'Lancer l\'appel Anis';
+        btnSubmitCall.innerHTML = loading ? loadingHtml : 'Lancer l\'appel';
       }
 
-      function launchCall(recruteur) {
+      function launchCall() {
         if (!isDemoMode) {
           if (!inputFichePoste.files.length) {
             showMessage('Veuillez sélectionner le PDF Fiche de Poste.', true);
@@ -474,7 +498,9 @@
           }
         }
 
-        var recruteurValue = isDemoMode ? 'Demo_' + recruteur : recruteur;
+        var recruteurValue = isDemoMode
+          ? 'Demo_' + selectDemoFiche.value + '_' + selectDemoCv.value
+          : 'Prod';
         const ton = document.getElementById('ton').value;
         const appelPour = selectAppelPour.value;
         const appelPourName = selectAppelPour.options[selectAppelPour.selectedIndex].text;
@@ -517,8 +543,7 @@
           });
       }
 
-      btnSubmitMarco.addEventListener('click', function () { launchCall('Marco'); });
-      btnSubmitAnis.addEventListener('click', function () { launchCall('Anis'); });
+      btnSubmitCall.addEventListener('click', launchCall);
     })();
   </script>
 </body>

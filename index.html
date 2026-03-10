@@ -612,20 +612,11 @@
               var rows = parseCSV(csvText);
               if (rows.length < 2) throw new Error('Sheet vide ou sans données');
               var header = rows[0].map(function (h) { return (h || '').trim(); });
-              var idxTesteur = header.indexOf('Testeur');
               var idxNom = header.indexOf('Nom');
               var idxNote = header.indexOf('Note');
               var idxCommentaire = header.indexOf('Commentaire');
               if (idxNom < 0 || idxNote < 0 || idxCommentaire < 0) throw new Error('Colonnes Nom, Note ou Commentaire introuvables');
-              var testeur = isDemoMode ? 'Demo_' + selectDemoFiche.value + '_' + selectDemoCv.value : null;
-              var dataRow = null;
-              for (var r = rows.length - 1; r >= 1; r--) {
-                var row = rows[r];
-                var rowTesteur = (row[idxTesteur] || '').trim();
-                if (testeur && rowTesteur === testeur) { dataRow = row; break; }
-                if (!testeur && rowTesteur) { dataRow = row; break; }
-              }
-              if (!dataRow) dataRow = rows[rows.length - 1];
+              var dataRow = rows[rows.length - 1];
               inputNom.value = (dataRow[idxNom] || '').trim();
               inputNote.value = (dataRow[idxNote] || '').trim();
               inputCommentaire.value = (dataRow[idxCommentaire] || '').trim();

@@ -210,7 +210,9 @@
       color: var(--text-primary);
     }
     .eval-table input[type="number"] { max-width: 5rem; }
-    .eval-table textarea { min-height: 4rem; resize: vertical; }
+    .eval-table textarea { min-height: 6rem; resize: none; overflow-y: hidden; }
+    .eval-table input[readonly],
+    .eval-table textarea[readonly] { background: #f5f2ef; cursor: default; }
     /* ——— Submit & message ——— */
     .submit-section {
       margin-top: 2rem;
@@ -398,7 +400,7 @@
     <h2 class="section-title" id="sec-eval">Évaluation du candidat</h2>
     <p class="section-subtitle">Des liens vers les CRM pourraient être réalisés.</p>
     <div class="eval-actions" style="margin-bottom: 1rem;">
-      <button type="button" class="btn-submit btn-secondary" id="btnLoadEval">Charger l'évaluation depuis le sheet</button>
+      <button type="button" class="btn-submit btn-secondary" id="btnLoadEval">Charger l'évaluation</button>
     </div>
     <div class="eval-card card">
       <table class="eval-table">
@@ -411,9 +413,9 @@
         </thead>
         <tbody>
           <tr>
-            <td><input type="text" id="nom" placeholder="Nom et prénom"></td>
-            <td><input type="number" id="note" min="0" max="100" placeholder="0-100"></td>
-            <td><textarea id="commentaire" placeholder="Commentaire"></textarea></td>
+            <td><input type="text" id="nom" placeholder="Nom et prénom" readonly></td>
+            <td><input type="number" id="note" min="0" max="100" placeholder="0-100" readonly></td>
+            <td><textarea id="commentaire" placeholder="Commentaire" readonly></textarea></td>
           </tr>
         </tbody>
       </table>
@@ -452,6 +454,12 @@
       const inputNom = document.getElementById('nom');
       const inputNote = document.getElementById('note');
       const inputCommentaire = document.getElementById('commentaire');
+
+      function fitCommentaireHeight() {
+        inputCommentaire.style.height = 'auto';
+        inputCommentaire.style.height = Math.max(96, inputCommentaire.scrollHeight) + 'px';
+      }
+      inputCommentaire.addEventListener('input', fitCommentaireHeight);
 
       function updateModeUI() {
         fieldDemoFiche.style.display = isDemoMode ? '' : 'none';
@@ -621,6 +629,7 @@
               inputNom.value = (dataRow[idxNom] || '').trim();
               inputNote.value = (dataRow[idxNote] || '').trim();
               inputCommentaire.value = (dataRow[idxCommentaire] || '').trim();
+              fitCommentaireHeight();
               showMessage('Évaluation chargée depuis le sheet.');
             })
             .catch(function (err) {
@@ -628,7 +637,7 @@
             })
             .finally(function () {
               btnLoadEval.disabled = false;
-              btnLoadEval.textContent = 'Charger l\'évaluation depuis le sheet';
+              btnLoadEval.textContent = 'Charger l\'évaluation';
             });
           return;
         }
@@ -651,6 +660,7 @@
             inputNom.value = data.nom || data.Nom || '';
             inputNote.value = data.note !== undefined ? data.note : (data.Note !== undefined ? data.Note : '');
             inputCommentaire.value = data.commentaire || data.Commentaire || '';
+            fitCommentaireHeight();
             showMessage('Évaluation chargée.');
           })
           .catch(function (err) {
@@ -658,7 +668,7 @@
           })
           .finally(function () {
             btnLoadEval.disabled = false;
-            btnLoadEval.textContent = 'Charger l\'évaluation depuis le sheet';
+            btnLoadEval.textContent = 'Charger l\'évaluation';
           });
       });
     })();
